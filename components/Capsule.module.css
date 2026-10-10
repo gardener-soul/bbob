@@ -1,0 +1,59 @@
+.closed {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 calc(8px * var(--s)) 0 rgba(27, 37, 89, 0.12));
+}
+
+.opened {
+  display: block;
+  width: 100%;
+  max-width: calc(300px * var(--s));
+  height: min(calc(190px * var(--s)), 20dvh);
+  flex-shrink: 0;
+}
+
+@media (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
+  .opened {
+    height: min(calc(190px * var(--s)), 36dvh);
+  }
+}
+
+/* 두 쪽이 붙어 있던 자리에서 벌어지며 열린다 */
+.topHalf,
+.bottomHalf,
+.bits {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.topHalf {
+  animation: top-open 0.55s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.bottomHalf {
+  animation: bottom-open 0.55s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.bits {
+  animation: bits-pop 0.6s 0.15s ease-out both;
+}
+
+@keyframes top-open {
+  from {
+    transform: translate(26px, 46px) rotate(24deg);
+  }
+}
+
+@keyframes bottom-open {
+  from {
+    transform: translate(-22px, -8px) rotate(-10deg);
+  }
+}
+
+@keyframes bits-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}

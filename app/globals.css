@@ -1,0 +1,78 @@
+/* 디자인 토큰 — 시안 A "새벽하늘 플랫" (https://claude.ai/artifact/PnoE7wSNo9b4p324AEYVX9) */
+:root {
+  --bg: #e9f2ff;
+  --ink: #1b2559;
+  --ink-sub: #3a4577;
+  --ink-mute: #5a6596;
+  --surface: #ffffff;
+  --accent: #ffd23f;
+  --accent-shadow: #e3ae00;
+  --link: #2563eb;
+  --dew: #9cc3ff;
+  --line: #d3dff3;
+  --danger: #c2321f;
+
+  --font-display: var(--font-black-han-sans), "Apple SD Gothic Neo", sans-serif;
+  --font-body: var(--font-gothic-a1), "Apple SD Gothic Neo", sans-serif;
+
+  /* 화면 배율: 시안(폰 390×844) px 에 곱한다 */
+  --s: 1;
+}
+
+/* iPad(mini 744 ~ Pro 1024). 폰 가로(높이 600 미만)는 제외 */
+@media (min-width: 700px) and (min-height: 600px) {
+  :root {
+    --s: 1.5;
+  }
+}
+
+/* iPad Pro·Air 13" (1024×1366) — 1.5배로는 여백이 너무 남는다 */
+@media (min-width: 1000px) and (min-height: 900px) {
+  :root {
+    --s: 1.8;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+  touch-action: manipulation;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+:focus-visible {
+  outline: 3px solid var(--link);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

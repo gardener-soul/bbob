@@ -1,0 +1,418 @@
+/* 근거: 시안 A Main.dc.html / A-Result.dc.html (390×844).
+   모든 크기는 시안 px × var(--s). 폰 --s:1(시안 그대로), iPad --s:1.5 — globals.css 참고 */
+
+.screen {
+  position: relative;
+  /* hidden 은 main 을 스크롤 컨테이너로 만들어 결과 화면의 sticky 버튼이 안 붙는다 → clip */
+  overflow: hidden;
+  overflow: clip;
+  min-height: 100dvh;
+  max-width: calc(430px * var(--s));
+  margin: 0 auto;
+  padding: max(calc(40px * var(--s)), env(safe-area-inset-top)) calc(24px * var(--s))
+    max(calc(28px * var(--s)), env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(16px * var(--s));
+}
+
+.deco {
+  position: absolute;
+  height: auto;
+  pointer-events: none;
+}
+
+.deco1 {
+  left: calc(-10px * var(--s));
+  top: calc(206px * var(--s));
+  width: calc(58px * var(--s));
+}
+
+.deco2 {
+  right: calc(2px * var(--s));
+  top: calc(300px * var(--s));
+  width: calc(48px * var(--s));
+}
+
+.deco3 {
+  right: calc(24px * var(--s));
+  top: calc(120px * var(--s));
+  width: calc(36px * var(--s));
+}
+
+/* ---------- 대기 · 회전 · 캡슐 · 소진 ---------- */
+
+.header {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(10px * var(--s));
+  text-align: center;
+}
+
+.chip {
+  font-size: calc(13px * var(--s));
+  font-weight: 600;
+  color: var(--ink-sub);
+  background: var(--surface);
+  padding: calc(6px * var(--s)) calc(12px * var(--s));
+  border-radius: 999px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: calc(34px * var(--s));
+  line-height: 1.2;
+}
+
+.sub {
+  margin: 0;
+  /* 오른쪽 장식 캡슐(right 24, 폭 36)과 겹치지 않는 폭 — 375px 화면 기준 */
+  max-width: calc(250px * var(--s));
+  font-size: calc(16px * var(--s));
+  line-height: 1.5;
+  color: var(--ink-sub);
+  word-break: keep-all;
+  white-space: pre-line;
+}
+
+.stage {
+  position: relative;
+  flex: 1 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 출구(머신 오른쪽 아래)에서 굴러 나와 앞으로 온다 */
+.capsule {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: calc(116px * var(--s));
+  height: calc(116px * var(--s));
+  margin-left: calc(-58px * var(--s));
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 50%;
+  animation:
+    capsule-drop 0.7s cubic-bezier(0.3, 1.3, 0.5, 1) both,
+    capsule-wiggle 1.6s 0.9s ease-in-out infinite;
+}
+
+@keyframes capsule-drop {
+  from {
+    opacity: 0;
+    /* 60% = 시안 70px / 캡슐 116px — 화면 배율과 함께 커진다 */
+    transform: translate(60%, -60%) scale(0.3) rotate(-90deg);
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+@keyframes capsule-wiggle {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  10% {
+    transform: rotate(-8deg);
+  }
+  20% {
+    transform: rotate(8deg);
+  }
+  30% {
+    transform: rotate(0);
+  }
+}
+
+.primary {
+  position: relative;
+  width: 100%;
+  max-width: calc(300px * var(--s));
+  height: calc(64px * var(--s));
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--ink);
+  font-size: calc(20px * var(--s));
+  font-weight: 800;
+  box-shadow: 0 calc(6px * var(--s)) 0 var(--accent-shadow);
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+
+.primary:active:not(:disabled) {
+  transform: translateY(calc(4px * var(--s)));
+  box-shadow: 0 calc(2px * var(--s)) 0 var(--accent-shadow);
+}
+
+.primary:disabled {
+  opacity: 0.55;
+}
+
+.primary[aria-busy="true"] {
+  opacity: 1;
+}
+
+.footer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(2px * var(--s));
+  margin-top: calc(8px * var(--s));
+  font-size: calc(12px * var(--s));
+  line-height: 1.6;
+  color: var(--ink-mute);
+  text-align: center;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(calc(28px * var(--s)), env(safe-area-inset-bottom));
+  transform: translate(-50%, 16px);
+  padding: calc(12px * var(--s)) calc(20px * var(--s));
+  border-radius: 999px;
+  background: var(--ink);
+  color: #ffffff;
+  font-size: calc(15px * var(--s));
+  font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.toast[data-show="true"] {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ---------- 결과 ---------- */
+
+.result {
+  padding-top: max(calc(36px * var(--s)), env(safe-area-inset-top));
+  padding-bottom: 0;
+}
+
+/* 세로에서는 상자 없이 흘려서 시안의 한 줄 배치 그대로, 가로에서만 두 칸이 된다 */
+.resultLeft,
+.resultRight {
+  display: contents;
+}
+
+.prize {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(6px * var(--s));
+  text-align: center;
+  animation: rise 0.4s 0.2s ease-out both;
+}
+
+.congrats {
+  font-size: calc(16px * var(--s));
+  font-weight: 600;
+  color: var(--ink-sub);
+}
+
+.rank {
+  font-family: var(--font-display);
+  font-size: min(calc(72px * var(--s)), 9dvh);
+  line-height: 1;
+}
+
+.prizeName {
+  margin-top: calc(6px * var(--s));
+  font-size: calc(18px * var(--s));
+  font-weight: 800;
+  background: var(--surface);
+  padding: calc(8px * var(--s)) calc(18px * var(--s));
+  border-radius: 999px;
+}
+
+.verseCard {
+  width: 100%;
+  background: var(--surface);
+  border-radius: calc(24px * var(--s));
+  padding: calc(24px * var(--s));
+  display: flex;
+  flex-direction: column;
+  gap: calc(12px * var(--s));
+  box-shadow: 0 calc(8px * var(--s)) calc(24px * var(--s)) rgba(27, 37, 89, 0.08);
+  animation: rise 0.4s 0.35s ease-out both;
+}
+
+.verseLabel {
+  display: flex;
+  align-items: center;
+  gap: calc(6px * var(--s));
+  font-size: calc(13px * var(--s));
+  font-weight: 800;
+  color: var(--link);
+}
+
+.verseLabel svg {
+  width: calc(16px * var(--s));
+  height: calc(16px * var(--s));
+  fill: none;
+  stroke: var(--link);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.verseText {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.55;
+  word-break: keep-all;
+}
+
+.verseL {
+  font-size: calc(22px * var(--s));
+}
+
+.verseM {
+  font-size: calc(20px * var(--s));
+}
+
+.verseS {
+  font-size: calc(18px * var(--s));
+}
+
+.verseRef {
+  font-size: calc(14px * var(--s));
+  color: var(--ink-mute);
+  text-align: right;
+}
+
+.resultFooter {
+  position: sticky;
+  bottom: 0;
+  align-self: stretch;
+  margin: auto calc(-24px * var(--s)) 0;
+  padding: calc(20px * var(--s)) calc(24px * var(--s)) max(calc(28px * var(--s)), env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: center;
+  /* 스크롤되는 말씀 카드가 버튼 위에서 뚝 끊기지 않게 */
+  background: linear-gradient(to bottom, rgb(233 242 255 / 0), var(--bg) calc(20px * var(--s)));
+}
+
+.secondary {
+  width: 100%;
+  max-width: calc(300px * var(--s));
+  height: calc(56px * var(--s));
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #ffffff;
+  font-size: calc(18px * var(--s));
+  font-weight: 800;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* ---------- iPad 가로: 두 칸 ----------
+   시안에 가로 프레임은 없다. 세로 시안의 요소·크기를 그대로 두고 배치만 나눈다.
+   폰 가로(높이 600 미만)는 제외 */
+@media (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
+  .screen {
+    max-width: 1240px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: 1fr auto auto auto 1fr;
+    grid-template-areas:
+      "stage ."
+      "stage header"
+      "stage button"
+      "stage footer"
+      "stage .";
+    column-gap: calc(32px * var(--s));
+    row-gap: calc(24px * var(--s));
+    align-items: center;
+    justify-items: center;
+  }
+
+  .header {
+    grid-area: header;
+  }
+
+  .stage {
+    grid-area: stage;
+    align-self: stretch;
+  }
+
+  .primary {
+    grid-area: button;
+  }
+
+  .footer {
+    grid-area: footer;
+    margin-top: 0;
+  }
+
+  .deco1 {
+    left: 2%;
+    top: 10%;
+  }
+
+  .deco2 {
+    right: 3%;
+    top: auto;
+    bottom: 12%;
+  }
+
+  .deco3 {
+    right: auto;
+    left: 48%;
+    top: 6%;
+  }
+
+  .result {
+    grid-template-rows: auto;
+    grid-template-areas: "left right";
+    align-content: center;
+    padding-bottom: max(calc(28px * var(--s)), env(safe-area-inset-bottom));
+  }
+
+  .resultLeft,
+  .resultRight {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(16px * var(--s));
+  }
+
+  .resultLeft {
+    grid-area: left;
+  }
+
+  .resultRight {
+    grid-area: right;
+    width: 100%;
+  }
+
+  .rank {
+    font-size: min(calc(72px * var(--s)), 15dvh);
+  }
+
+  .resultFooter {
+    position: static;
+    margin: calc(8px * var(--s)) 0 0;
+    padding: 0;
+    background: none;
+  }
+}

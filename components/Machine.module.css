@@ -1,0 +1,77 @@
+.machine {
+  display: block;
+  /* 작은 화면에서 버튼이 밀려나지 않게 뷰포트 높이에 묶는다(스펙 §6).
+     356px = 위아래 여백 68 + 머리말 113 + 간격 16·16·24 + 버튼 64 + 하단 문구 40 + 여유 15 (390×844 실측).
+     모두 배율(--s)을 따른다 */
+  height: min(
+    calc(387px * var(--s)),
+    max(calc(160px * var(--s)), calc(100dvh - 356px * var(--s)))
+  );
+  width: auto;
+  aspect-ratio: 300 / 400;
+  overflow: visible;
+  transform-origin: 50% 100%;
+}
+
+/* iPad 가로: 머신이 왼쪽 칸을 혼자 쓰므로 세로 여백만 뺀다 */
+@media (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
+  .machine {
+    height: min(calc(387px * var(--s)), calc(100dvh - 100px * var(--s)));
+  }
+}
+
+.label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 800;
+  fill: #9cc3ff;
+  text-anchor: middle;
+}
+
+.knob {
+  transform-box: view-box;
+  transform-origin: 150px 324px;
+}
+
+.spinning {
+  animation: shake 0.6s ease-in-out 2;
+}
+
+.spinning .knob {
+  animation: turn 1.2s cubic-bezier(0.45, 0, 0.25, 1);
+}
+
+.spinning .pile {
+  animation: jiggle 0.15s ease-in-out 8 alternate;
+}
+
+@keyframes turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  20% {
+    transform: rotate(-2deg);
+  }
+  40% {
+    transform: rotate(2deg);
+  }
+  60% {
+    transform: rotate(-1.5deg);
+  }
+  80% {
+    transform: rotate(1.5deg);
+  }
+}
+
+@keyframes jiggle {
+  to {
+    transform: translateY(-8px);
+  }
+}
