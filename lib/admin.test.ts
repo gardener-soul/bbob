@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isAdminPassword, parsePrizeUpdate } from "./admin";
+import { isAdminPassword, parsePrizeUpdate, parseTeam } from "./admin";
 
 const valid = { rank: 1, name: "기프트카드 1만원권", stock: 7, initialStock: 7 };
 
@@ -46,5 +46,15 @@ describe("isAdminPassword", () => {
     expect(isAdminPassword("", undefined)).toBe(false);
     expect(isAdminPassword("", "")).toBe(false);
     expect(isAdminPassword("anything", undefined)).toBe(false);
+  });
+});
+
+describe("parseTeam", () => {
+  it.each([1, 4, 7])("%s팀은 받아들인다", (team) => {
+    expect(parseTeam(team)).toBe(team);
+  });
+
+  it.each([0, 8, 2.5, "3", null, undefined])("%s는 거절(null)", (team) => {
+    expect(parseTeam(team)).toBeNull();
   });
 });

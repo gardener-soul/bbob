@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { CAPSULE_COLORS, ClosedCapsule, MiniCapsule, OpenedCapsule } from "@/components/Capsule";
 import { Machine } from "@/components/Machine";
+import { TeamToggle } from "@/components/TeamToggle";
+import { useTeam } from "@/lib/useTeam";
 import { pickVerse, type Verse } from "@/lib/verses";
 import styles from "./page.module.css";
 
@@ -20,6 +22,7 @@ const HEADINGS: Record<Exclude<Phase, "result">, [string, string]> = {
 };
 
 export default function DrawPage() {
+  const [team, setTeam] = useTeam();
   const [phase, setPhase] = useState<Phase>("idle");
   const [won, setWon] = useState<Won | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -34,12 +37,19 @@ export default function DrawPage() {
   }
 
   async function spin() {
-    if (phase !== "idle" || drawing.current) return;
+    if (phase !== "idle" || team === null || drawing.current) return;
     drawing.current = true;
     setPhase("spinning");
     const color = CAPSULE_COLORS[Math.floor(Math.random() * CAPSULE_COLORS.length)];
     try {
-      const [res] = await Promise.all([fetch("/api/draw", { method: "POST" }), wait(MIN_SPIN_MS)]);
+      const [res] = await Promise.all([
+        fetch("/api/draw", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ team }),
+        }),
+        wait(MIN_SPIN_MS),
+      ]);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       if (data.soldOut) {
@@ -61,15 +71,28 @@ export default function DrawPage() {
     setPhase("idle");
   }
 
+  function chooseTeam(next: number) {
+    setTeam(next);
+    // 한 팀이 바닥나 다른 팀 판으로 바꾸면 다시 뽑을 수 있게
+    if (phase === "soldout") setPhase("idle");
+  }
+
   if (phase === "result" && won) {
     return <ResultView won={won} onNext={next} />;
   }
 
-  const [title, sub] = HEADINGS[phase === "result" ? "idle" : phase];
+  const [title, defaultSub] = HEADINGS[phase === "result" ? "idle" : phase];
+  const needTeam = team === null && phase === "idle";
+  const sub = needTeam ? "위에서 우리 팀을 먼저 골라주세요" : defaultSub;
 
   return (
     <main className={styles.screen}>
       <Decorations />
+
+      {/* 레버를 돌린 뒤에는 팀을 못 바꾼다(지나가는 분이 실수로 바꾸지 않게) */}
+      <div className={styles.teamBar}>
+        <TeamToggle value={team} onChange={chooseTeam} disabled={phase === "spinning" || phase === "capsule"} />
+      </div>
 
       <header className={styles.header}>
         <div className={styles.chip}>수원제일교회 새벽이슬청년부</div>
@@ -100,10 +123,10 @@ export default function DrawPage() {
           type="button"
           className={styles.primary}
           onClick={spin}
-          disabled={phase !== "idle"}
+          disabled={phase !== "idle" || team === null}
           aria-busy={phase === "spinning"}
         >
-          {phase === "spinning" ? "돌리는 중…" : "레버 돌리기"}
+          {phase === "spinning" ? "돌리는 중…" : needTeam ? "팀을 골라주세요" : "레버 돌리기"}
         </button>
       )}
 

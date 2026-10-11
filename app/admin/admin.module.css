@@ -180,3 +180,48 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+.teams {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.teamTab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 52px;
+  padding: 6px 0;
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.teamTab[aria-pressed="true"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #ffffff;
+}
+
+.teamName {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.teamCount {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.dirty {
+  margin-left: 1px;
+  color: var(--accent-shadow);
+}
+
+.note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-mute);
+}

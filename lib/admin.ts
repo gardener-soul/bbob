@@ -1,5 +1,5 @@
 import { createHash, timingSafeEqual } from "node:crypto";
-import type { Prize } from "./types";
+import { TEAM_COUNT, type Prize } from "./types";
 
 type ParseResult = { ok: true; prizes: Prize[] } | { ok: false; error: string };
 
@@ -27,6 +27,13 @@ export function parsePrizeUpdate(input: unknown): ParseResult {
     prizes.push({ rank: rank as number, name: name.trim(), stock, initialStock });
   }
   return { ok: true, prizes };
+}
+
+/** 1~7팀이면 그 번호, 아니면 null */
+export function parseTeam(input: unknown): number | null {
+  return Number.isInteger(input) && (input as number) >= 1 && (input as number) <= TEAM_COUNT
+    ? (input as number)
+    : null;
 }
 
 const digest = (s: string) => createHash("sha256").update(s).digest();

@@ -15,30 +15,31 @@
 
 ## 2. 운영 방식
 
-- 청년부 스태프 여러 명이 각자 폰으로 같은 URL에 접속한다. URL은 스태프끼리만 공유한다.
-- 전도지를 받은 분이 스태프 폰을 탭해서 뽑고, 스태프가 그 자리에서 상품을 건넨다.
-- 재고는 전체 하나다. 팀별·회차별로 나누지 않는다.
+- 청년부 스태프 여러 명이 각자 기기(주로 iPad)로 같은 URL에 접속한다. URL은 스태프끼리만 공유한다.
+- 전도지를 받은 분이 스태프 기기를 탭해서 뽑고, 스태프가 그 자리에서 상품을 건넨다.
+- **재고는 7개 팀이 나눠 갖는다(2026-10-11 변경).** 상품을 7등분해 팀마다 들고 다니므로, 뽑기는 고른 팀의 재고 안에서만 나온다.
+  기기마다 팀을 한 번 고르면 그 기기에 기억된다(localStorage).
 - 중복 뽑기 방지는 하지 않는다. 스태프가 직접 운영하기 때문이다.
 
 ## 3. 상품 (초기값)
 
-| 등수 | 상품 | 수량 | 처음 확률 |
-|---|---|---|---|
-| 1 | 기프트카드 1만원권 | 7 | 5.3% |
-| 2 | 말랑이 or 그립톡 | 21 | 15.8% |
-| 3 | 물병 | 35 | 26.3% |
-| 4 | 파우치 | 35 | 26.3% |
-| 5 | 키링 | 35 | 26.3% |
+| 등수 | 상품 | 팀당 | 전체(7팀) | 팀 안 처음 확률 |
+|---|---|---|---|---|
+| 1 | 기프트카드 1만원권 | 1 | 7 | 5% |
+| 2 | 말랑이 or 그립톡 | 4 | 28 | 20% |
+| 3 | 볼펜 | 5 | 35 | 25% |
+| 4 | 파우치 | 5 | 35 | 25% |
+| 5 | 키링 | 5 | 35 | 25% |
 
-- 상품명과 수량은 `/admin`에서 바꿀 수 있다.
+- 팀당 20개, 전체 140개. 상품명은 모든 팀 공통, 수량은 팀마다 따로 `/admin`에서 바꿀 수 있다.
 - 꽝은 없다.
 
 ## 4. 뽑기 규칙
 
-- 확률은 **남은 재고에 비례**한다(뽑기통 방식). 등수 r의 확률 = `stock_r / Σstock`.
+- 확률은 **그 팀의 남은 재고에 비례**한다(뽑기통 방식). 등수 r의 확률 = `stock(팀, r) / Σstock(팀)`.
 - 재고가 0인 등수는 후보에서 빠진다. 전부 0이면 "소진"으로 응답한다.
 - 등수 선택은 순수 함수 `pickRank(prizes, rand)`가 맡는다. `rand`는 [0,1) 값을 주입받아서 테스트할 수 있게 한다.
-- 재고 차감은 DB 함수 `take_prize(rank)`가 맡는다. `stock > 0`일 때만 1을 줄이고, 성공 여부를 돌려준다.
+- 재고 차감은 DB 함수 `take_prize(team, rank)`가 맡는다. `stock > 0`일 때만 1을 줄이고, 성공 여부를 돌려준다.
 - 차감이 실패하면(그 사이 다른 폰이 마지막 하나를 가져간 경우) 재고를 다시 읽고 다시 고른다. 최대 3번까지 시도한다.
   재고가 음수로 내려가지 않는 건 DB 제약(`stock >= 0`)이 함께 보장한다.
 
@@ -48,11 +49,12 @@
 
 | 상태 | 화면 | 다음 |
 |---|---|---|
+| 팀 미선택 | 맨 위 `1팀~7팀` 토글, "위에서 우리 팀을 먼저 골라주세요", 버튼 "팀을 골라주세요"(비활성) | 팀 선택 → 대기 |
 | 대기 | 머신과 "레버를 돌려볼까요?", 노란 "레버 돌리기" 버튼 | 버튼이나 손잡이 탭 → 회전 |
 | 회전 | 손잡이가 돌고 머신이 흔들린다. 이때 `POST /api/draw` 호출 | 애니메이션(최소 1.2초)과 응답이 모두 끝나면 → 캡슐 |
 | 캡슐 | 출구에서 캡슐이 굴러 나온다. "캡슐을 눌러 열어보세요" | 캡슐 탭 → 결과 |
 | 결과 | 캡슐이 열리고 컨페티가 터진다. "N등"과 상품명, 말씀 카드, "다음 분 뽑기" | 다음 분 뽑기 → 대기 |
-| 소진 | "준비한 선물이 모두 나갔어요" + 감사 문구. 버튼 비활성 | — |
+| 소진 | 그 팀 재고가 0. "선물이 모두 나갔어요" + 감사 문구. 버튼 비활성 | 다른 팀 선택 → 대기 |
 | 오류 | 네트워크 오류. "다시 돌려주세요" 토스트 후 대기로 돌아감(재고 변화 없음) | 대기 |
 
 - 캡슐 색은 무작위로 정한다. 등수와 무관하게 해서 열기 전에는 결과를 알 수 없게 한다.
@@ -61,8 +63,12 @@
   출처 문구("성경전서 개역개정판 ⓒ대한성서공회")와 "말씀 카드는 사진으로 담아가셔도 좋아요" 안내는 넣지 않는다(사용자 결정, 2026-10-09).
 - 결과 화면의 "다음 분 뽑기"는 하단에 고정(sticky)한다. 긴 말씀으로 화면이 넘쳐도 버튼이 항상 보인다.
 - 회전 중에는 버튼을 막아서 두 번 눌리지 않게 한다.
+- 팀 토글은 대기·소진에서만 바꿀 수 있다(회전·캡슐 중 비활성). 지나가는 분이 실수로 바꾸지 않게 차분한 스타일로 둔다.
 
 ### 5.2 관리 화면 `/admin`
+
+- 위에 전체 남은 개수와 나간 개수, 그 아래 7팀 탭(팀마다 남은/처음 개수). 탭을 눌러 팀별로 수량을 고친다.
+- 상품명은 모든 팀 공통이라 어느 팀에서 고쳐도 전 팀에 반영된다. 여러 팀을 고친 뒤 저장 한 번에 모두 보낸다.
 
 - 비밀번호 입력 → `sessionStorage`에 보관해서 탭을 닫기 전까지 유지한다.
 - 표: 등수 / 상품명(입력) / 남은 수량(입력) / 처음 수량(입력) / 지금 확률.
@@ -134,25 +140,13 @@ README.md                  배포 절차
 ## 9. 데이터
 
 ```sql
-create table prizes (
-  rank int primary key check (rank between 1 and 5),
-  name text not null,
-  stock int not null check (stock >= 0),
-  initial_stock int not null check (initial_stock >= 0)
-);
-alter table prizes enable row level security;   -- 정책 없음: anon 키로는 접근 불가
-
-create function take_prize(p_rank int) returns boolean
-language sql as $$
-  with u as (
-    update prizes set stock = stock - 1
-    where rank = p_rank and stock > 0
-    returning 1
-  )
-  select exists(select 1 from u);
-$$;
-revoke execute on function take_prize(int) from public, anon, authenticated;  -- 서버(service role)만 호출
+prizes(rank 1~5 PK, name)                                   -- 상품명, 모든 팀 공통
+team_stock(team 1~7, rank → prizes, stock ≥ 0, initial_stock ≥ 0, PK(team, rank))
+take_prize(p_team, p_rank) → boolean                        -- 그 팀 재고가 있을 때만 1 차감, service role 전용
 ```
+
+- 전체 SQL은 `supabase/schema.sql`. 처음 실행해도, 팀 구분 전 스키마에서 다시 실행해도 된다(옛 재고 컬럼 제거 후 팀 재고 생성).
+- 두 테이블 모두 RLS를 켜고 정책을 두지 않는다. service role에는 select/insert/update와 함수 실행 권한을 명시한다.
 
 - 뽑기 기록 테이블은 두지 않는다. 나간 개수는 `initial_stock - stock`으로 계산한다.
 
@@ -160,9 +154,9 @@ revoke execute on function take_prize(int) from public, anon, authenticated;  --
 
 | 메서드 | 경로 | 요청 | 응답 |
 |---|---|---|---|
-| POST | `/api/draw` | — | `200 {rank, name}` / `200 {soldOut: true}` / `500 {error}` |
-| GET | `/api/admin/prizes` | 헤더 `x-admin-password` | `200 [{rank, name, stock, initialStock}]` / `401` |
-| PUT | `/api/admin/prizes` | 헤더 + `[{rank, name, stock, initialStock}]` | `200` 갱신된 목록 / `400` 검증 실패 / `401` |
+| POST | `/api/draw` | `{team}` | `200 {rank, name}` / `200 {soldOut: true}` / `400` 팀 없음 / `500 {error}` |
+| GET | `/api/admin/prizes` | 헤더 `x-admin-password` | `200 [{team, prizes: [{rank, name, stock, initialStock}]}]` / `401` |
+| PUT | `/api/admin/prizes` | 헤더 + `{team, prizes: [...]}` | `200` 전체 팀 목록 / `400` 검증 실패 / `401` |
 
 - PUT 검증: rank는 1~5, name은 빈 문자열 불가, stock과 initialStock은 0 이상 정수.
 - 환경변수: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD`. service role 키는 서버에서만 쓴다.

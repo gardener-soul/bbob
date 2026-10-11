@@ -1,0 +1,38 @@
+/* 스태프용 컨트롤 — 지나가는 분 눈에 띄지 않게 차분하게. 크기는 화면 배율(--s)을 따른다 */
+.toggle {
+  position: relative;
+  display: flex;
+  gap: calc(4px * var(--s));
+  width: 100%;
+  max-width: calc(342px * var(--s));
+  padding: calc(3px * var(--s));
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.6);
+}
+
+.team {
+  flex: 1 1 0;
+  min-width: 0;
+  height: calc(32px * var(--s));
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-mute);
+  font-size: calc(13px * var(--s));
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.team[aria-pressed="true"] {
+  background: var(--ink);
+  color: #ffffff;
+}
+
+.team:disabled {
+  cursor: default;
+}
+
+.team:disabled:not([aria-pressed="true"]) {
+  opacity: 0.45;
+}

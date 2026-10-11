@@ -23,25 +23,40 @@
   pointer-events: none;
 }
 
+/* 시안 위치 + 팀 토글 높이(38 + 간격 16 = 54) 만큼 아래로 — 머리말과의 관계를 시안대로 유지 */
 .deco1 {
   left: calc(-10px * var(--s));
-  top: calc(206px * var(--s));
+  top: calc(260px * var(--s));
   width: calc(58px * var(--s));
 }
 
 .deco2 {
   right: calc(2px * var(--s));
-  top: calc(300px * var(--s));
+  top: calc(354px * var(--s));
   width: calc(48px * var(--s));
 }
 
 .deco3 {
   right: calc(24px * var(--s));
-  top: calc(120px * var(--s));
+  top: calc(174px * var(--s));
   width: calc(36px * var(--s));
 }
 
+/* 아주 낮은 화면(툴바 보이는 작은 폰)에서는 머신이 작아져 버튼 옆에 걸린다 */
+@media (max-height: 599px) {
+  .deco2 {
+    display: none;
+  }
+}
+
 /* ---------- 대기 · 회전 · 캡슐 · 소진 ---------- */
+
+.teamBar {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
 
 .header {
   position: relative;
@@ -333,9 +348,10 @@
     max-width: 1240px;
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-rows: 1fr auto auto auto 1fr;
+    grid-template-rows: 1fr auto auto auto auto 1fr;
     grid-template-areas:
       "stage ."
+      "stage team"
       "stage header"
       "stage button"
       "stage footer"
@@ -344,6 +360,10 @@
     row-gap: calc(24px * var(--s));
     align-items: center;
     justify-items: center;
+  }
+
+  .teamBar {
+    grid-area: team;
   }
 
   .header {
